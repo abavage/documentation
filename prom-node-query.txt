@@ -1,0 +1,5 @@
+# node CPU
+1 - avg without (cpu) (sum without (mode) (rate(node_cpu_seconds_total{job="node-exporter", mode=~"idle|iowait|steal"}[1m])))
+
+# node load / saturation
+(node_load1{job="node-exporter"} / count without (cpu, mode) (node_cpu_seconds_total{job="node-exporter",mode="idle"}))
