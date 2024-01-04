@@ -1,0 +1,91 @@
+# ps
+ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem
+
+# deploy
+oc create deploy tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
+oc set resources deployment tools --limits=cpu=200m,memory=200Mi --requests=cpu=100m,memory=100Mi
+
+oc run tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
+oc run tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest  --dry-run=client -o yaml
+
+## Aduit logs
+oc adm node-logs --role=master --path=kube-apiserver/
+oc adm node-logs  <master_node> --path=kube-apiserver/audit-2023-11-09T05-32-38.217.log > audit-2023-11-09T05-32-38.217.log
+ 
+while read -r line; do echo "$line" | jq -r '.objectRef.resource + "," + .verb + "," + .objectRef.namespace + "," + .objectRef.name + "," + .user.username' ; done < audit-2023-11-09T04-21-29.518.log >> sorted-audit-2023-11-09T04-21-29.518.log
+ 
+grep "pods,watch" sorted-audit-2023-11-09T04-21-29.518.log | wc
+grep "pods,watch" sorted-audit-2023-11-09T04-21-29.518.log | grep collect | wc
+
+# thanos endpoint query
+TOKEN=$(oc -n openshift-monitoring get secret $(oc -n openshift-monitoring get sa prometheus-k8s -o json  | jq -r '.secrets[].name') -o json | jq -r '.metadata.annotations."openshift.io/token-secret.value"')
+curl -k -H "Authorization: Bearer $TOKEN" https://thanos-querier-openshift-monitoring.apps..../api/v1/query? --data-urlencode "query=up"
+
+# KUBECONFIG
+# On master nodes
+ls -al /etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/node-kubeconfigs/
+
+export KUBECONFIG=/etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/node-kubeconfigs/localhost.kubeconfig
+
+* lb-ext.kubeconfig: It points to external API load balancer (api.<cluster-domain>)
+* lb-int.kubeconfig: It points to internal API load balancer (api-int.<cluster-domain>)
+* localhost.kubeconfig: It points to localhost. This one is useful in case of problems with the load balancers, for example.
+* localhost-recovery.kubeconfig: It points to localhost but sends the localhost-recovery SNI name, which in turns causes the special server certificates used by the auto-recovery logic to be used. This one may be useful if kube-apiserver serving certificates are expired and the auto-recovery logic has failed.
+
+
+# Prune object from etcd - see above for oc commands if needed
+oc debug node/<master>
+
+crictl ps | grep etcd
+crictl exec -ti <some id> /bin/bash
+
+# in the crictl container
+etcdctl get "" --prefix --keys-only
+
+# get desired item(s)
+etcdctl get "" --prefix --keys-only | grep nonprod
+
+# displays the item (secret) as plain text
+etcdctl get /kubernetes.io/secrets/nonprod/file
+
+# remove the secret 
+etcdctl del /kubernetes.io/secrets/nonprod/file
+
+# remove events from namespace
+# events can consume considerable size also
+for i in $(etcdctl get "" --prefix --keys-only | grep nonprod | grep events) ; do etcdctl del $i ; done
+
+## Stop the kube-apiserver on a master
+oc debug node/<node>
+chroot /host
+
+# cd into the static directory
+cd /etc/kubernetes/static-pod-resources
+
+# find the newest / largest number revision of the kube-apiserver-pod
+ls -ltrd kube-apiserver-pod
+
+# move the directory to tmp
+mv kube-apiserver-pod-11 /tmp/
+
+# stop all the kube-apiserver containers - should be 5 of them
+# not the kube-apiserver-operator
+crictl ps | grep kube-apiserver
+crictl stop -t 5 <id> <id> <id> <id> <id>
+
+# test it locally - should fail
+export KUBECONFIG=/etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/node-kubeconfigs/localhost.kubeconfig
+oc get pods -n openshift-kube-apiserver
+
+# start it back up 
+mv /tmp/kube-apiserver-pod-11 /etc/kubernetes/static-pod-resources/
+
+# Either wait for the CrashLoopBackOff timeout to expire or delete the apiserver pod from other shell
+oc delete pod kube-apiserver-control-plane-cluster-vqmb2-1 -n openshift-kube-apiserver
+
+# test it locally - should work
+export KUBECONFIG=/etc/kubernetes/static-pod-resources/kube-apiserver-certs/secrets/node-kubeconfigs/localhost.kubeconfig
+oc get pods -n openshift-kube-apiserver
+
+# force redeployment - takes the operator 5 - 10mins to rollout
+oc patch kubeapiserver/cluster --type merge -p "{\"spec\":{\"forceRedeploymentReason\":\"Forcing new revision with random number $(date --rfc-3339=ns) to make message unique\"}}"
