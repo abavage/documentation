@@ -1,0 +1,279 @@
+oc describe hostsubnet ip-10-11-208-229.domain.com
+
+oc new-build 123456-s2i-base-rhel7:latest~ssh://git@bitbucket.domain.com:2222/~a123456/httpd.git --name=a123456 --source-secret=a123456-bitbucket --strategy=docker
+oc new-build 123456-s2i-python:3.6-ubi7~ssh://git@bitbucket.domain.com:2222/~a123456/a123456-dockerbuild.git --name=a1234561 --source-secret=a123456 --strategy=docker
+
+https://nexus.domain.com/service/local/repositories/inhouse/content/digital-platform/apache-tomcat-example/1.0.0/apache-tomcat-example-1.0.0.war
+
+# Tomcat BUILD_ARTIFACT_URL
+oc new-build 123456-s2i-tomcat-feature-opnshift-537:8.5-jdk8-ubi7-20191014~ssh://git@bitbucket.domain.com:2222/~a123456/httpd.git --name=a123456 --source-secret=a123456-ssh --env=BUILD_ARTIFACT_URL=https://nexus.domain.com/service/local/repositories/inhouse/content/digital-platform/apache-tomcat-example/1.0.0/apache-tomcat-example-1.0.0.war --strategy=source 
+
+oc new-build 123456-s2i-tomcat-feature-opnshift-771:8.5-jdk8-ubi7~ssh://git@bitbucket.domain.com:2222/~a123456/httpd.git --name=a123456-test-url --source-secret=a123456-ssh --env=BUILD_ARTIFACT_URL=https://a123456:<passwd>@artifactory.domain.com/artifactory/DiCE-private/test/java/wars/tcs2itest-1.war --strategy=source
+
+
+# Tomcat Source
+oc new-build 123456-s2i-tomcat-feature-opnshift-537:8.5-jdk8-ubi7-20191014~ssh://git@bitbucket.domain.com:2222/~a123456/a123456-tomcat.git --name=a123456 --source-secret=a123456-ssh  --env=BUILD_WRAPPER=mvnw --strategy=source
+
+
+oc describe nodes -l node-role.kubernetes.io/compute=true | awk '/CPU Requests/,/Allocated resources/'
+
+ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head
+sar -p -f /var/log/sa/saXY
+sar -r -f /var/log/sa/saXY
+sar -d -p -f /var/log/sa/saXY
+sudo sar -d -p -s 07:00:00 -e 08:10:00 -f /var/log/sa/XY
+
+
+oc get -o yaml pv -o custom-columns=name:metadata.name,claim:spec.claimRef.name,backend:spec.csi.volumeAttributes.backendUUID,NAMESPACE:spec.claimRef.namespace
+
+oc get pods --field-selector=status.phase=Running
+oc get pods -o custom-columns=NAME:.metadata.name,:.status.phase
+
+oc get pods -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --field-selector=status.phase=Running
+oc get pods --all-namespaces --field-selector=status.phase=Running,metadata.namespace=a-001522
+
+
+oc get events --field-selector --sort-by=.metadata.creationTimestamp --field-selector involvedObject.name=<pod_name>
+oc get events --sort-by='.lastTimestamp'
+oc get events --sort-by='.metadata.creationTimestamp'
+
+
+# Display the hostname 
+curl -s -u a123456:<passwd> http://name.domain.com/path/path/monitoringcodes/12 | jq '.Monitoring[3].Monitors[].field1'
+ curl -X DELETE -s -u a123456:<passwd> http://name.domain.com/path/path/monitors/123456
+
+#Suspend cron job cj
+oc patch cj ocp-cluster-capacity -p '{"spec": {"suspend": true}}'
+
+export ANSIBLE_HOST_KEY_CHECKING=false
+
+# patch inline
+oc patch deployment cluster-autoscaler -p '{"spec": {"replicas": 0}}'
+
+# get some stuff
+oc get pod master-api-ip-10-10-10-1.domain.com -o json | jq '.spec.containers' | jq '[.[] | {livenessProbe: .livenessProbe}]'
+
+
+# Copy images between regestries
+skopeo copy --src-cert-dir=. --src-creds="A123456:xxxxxxxxxxxx" --dest-cert-dir=. --dest-creds="A123456:xxxxxxxxxxx" --dest-tls-verify=false --src-tls-verify=false docker://docker-registry-default.aws-dev.os-platform.app.domain.com/openshift/123456-cassandra-cronjob docker://docker-registry-default.aws.os-platform.app.domain.com/openshift/123456-cassandra-cronjob:999999
+
+# skopeo Copy to v4 from dockerhub on a master via a debug shell
+export HTTP_PROXY=http://a123456:<passwd>@someproxy.domain.com:8888
+export NO_PROXY=domain.com,169.254.169.254,svc
+skopeo --debug copy --src-cert-dir=. --dest-cert-dir=. --dest-creds="$USERNAME:$TOKEN"  --src-tls-verify=false docker://$IMAGE  docker://default-route-openshift-image-registry.apps.aws-nonprod-v4.os.app.domain.com/$NAMESPACE/postgres:13-alpine
+
+
+# Add a line between every line
+sed -i '0~1 a\\' inputfile
+
+# remove white spaces
+sed 's/^ *//g'
+
+# Add group specifc for dryrun
+oc adm groups new openshift-admins A123456
+oc adm groups add-users openshift-admins a123456 
+
+# get the api resources
+oc api-resources -o wide
+oc get --raw /apis/autoscaling/v2beta1
+oc get --raw /apis/apps.openshift.io/v1
+
+
+# resources
+oc set resources dc grafana --limits=memory=500Mi --requests=memory=150Mi 
+oc set resources dc grafana --limits=cpu=500m --requests=cpu=100m
+
+
+# Set asg instance state to healthy
+aws autoscaling set-instance-health --instance-id i-0ef3f8f300eda19ef --health-status Healthy
+
+# List the stack
+aws cloudformation describe-stacks --region ap-southeast-2 | jq -r '.Stacks[].StackName'
+
+# git tags
+git fetch --tags
+git checkout aws-dev-cluster
+
+# checkout at a specific hash
+git clone --recursive ssh://git@bitbucket.domain.com:22/ocp/playbook.git
+git checkout 529b86xxxxxxxxxx
+
+
+# oc explain with different api
+oc explain --api-version=autoscaling/v2beta1 HorizontalPodAutoscaler.spec.metrics.resource
+
+# Consume memory in a pod 200MB
+#while true ; do yes | tr \\n x | head -c $((1024*1024*200)) | grep n ; done
+
+# Consume memory
+cat /dev/zero | head -c 5G | tail &
+
+# Generate data
+while true ; do cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 5000 | head -10000 ; done
+
+
+# get the pods
+for i in `oc get pods --no-headers=true | grep logging-fluentd | awk '{print $1}'`; do echo $i ; oc exec $i -- logs | tail ; echo "" ; echo "" ; echo "" ; done
+for i in `oc get pods --no-headers=true | grep logging-fluentd | awk '{print $1}'`; do echo $i ; oc rsh $i ls -ltr /var/lib/fluentd/  ; echo "" ; echo "" ; echo "" ; done
+
+# Tee output with stderr
+something  |& tee -a somefile.txt
+
+# show labels
+oc get nodes --show-labels
+
+# run gc manually
+ sudo oc ex dockergc  --dry-run=true
+
+# Get and set env vars
+oc set env ds logging-fluentd --list -n openshift-logging
+oc set env ds logging-fluentd BUFFER_QUEUE_LIMIT=256 -n openshift-logging
+oc set env ds logging-fluentd FILE_BUFFER_LIMIT=2048Mi -n openshift-logging
+
+# one off cj
+oc create job a123456-curator --from=cronjob/logging-curator
+
+# Taint and tolerations
+oc adm taint nodes ip-10-11-208-62.domain.com redhat-taint=a123456:NoExecute
+tolerations:
+- effect: NoExecute
+  key: redhat-taint
+  value: a123456
+  operator: Equal
+
+# dstat replaces iostat, vmstat anything stat
+dstat --time --cpu --mem --net --disk --sys --load --proc --top-cpu --top-mem
+dstat --time --cpu --mem --net --disk --sys --load --proc --top-cpu-adv --top-mem --top-latency-avg
+
+# prometheous cpu saturation
+node:node_cpu_saturation_load1:{node="ip-10-11-209-193.domain.com"}
+
+# prometheus pending pods
+kube_pod_status_phase{phase="Pending"} > 0
+sum(kube_pod_status_phase{phase="Pending"}) > 0
+
+# prometheus cpu usage
+rate(container_cpu_usage_seconds_total{container_name=~"elasticsearch"}[5m])
+
+
+# extract a secret
+oc extract secret/grafana-datasources --keys=prometheus.yaml --to=- -n openshift-monitoring
+
+# curl node exporter
+oc sa get-token prometheus-k8s -n openshift-monitoring > token
+oc rsh node-exporter
+TOKEN=$(cat token)
+curl -s -k -H "Authorization: Bearer $TOKEN" https://10.11.209.233:9100/metrics
+
+# curl elasticsearch
+oc rsh logging-es-data-master-cqufqv0u-13-dlsww curl -s -k --cert /etc/elasticsearch/secret/admin-cert --key /etc/elasticsearch/secret/admin-key https://localhost:9200/_prometheus/metrics
+
+# curl kiam enabled pod
+oc rsh <some_pod> curl http://169.254.169.254/latest/meta-data/iam/security-credentials/arn:aws:iam::1234567:role/awsrole-node
+
+
+
+# print hostvars - --graph print the actual contents of the variable not just the vaiable name like --list
+source scripts/proxy.sh
+ansible-inventory -i inventory --vars --list --output yyy.out
+ansible-inventory -i inventory --vars --graph --output yyy.out
+
+# get memory status from a pod
+oc rsh <some_pod> cat /sys/fs/cgroup/memory/memory.stat
+
+# patch the finalizers
+oc patch -p '{"metadata":{"finalizers": []}}' --type=merge crd/tridentvolumes.trident.netapp.io
+
+
+# git merge conflict
+git checkout feature/sns-forwarder 
+git pull origin master 
+Step 2: After the merge conflicts are resolved, stage the changes accordingly, commit the changes and push.
+git commit 
+git push origin HEAD
+
+
+# patch an image in dc / depoy / rc / rs
+oc3 patch rc somename -p '{"spec": {"template": {"spec": {"containers": [{"name": "ui-dev", "image": "docker-registry.default.svc:5000/name/image:0.1"}]}}}}'
+
+# Add PVC to a dc
+oc set volume dc/test-iscsi --add --name=testo -t pvc --claim-size=4Gi --claim-name=testo -m /testo --claim-class=netapp-iscsi
+
+# Patch with a list
+oc patch pv pvc-44db7da6-b7a5-4e02-84bd-1e40d07c6923 --type json -p '[{"op": "add", "path": "/spec/mountOptions", "value": ["discard"]}]'
+
+
+# OnTap stuff
+lun show -vserver svm_netappaws00118601b /vol/ocp_iscsi_sandpit_pvc_7ecbab02_9f7b_4149_b559_ff52dacab2e1/lun0 -fields size-used,size
+volume show ocp_iscsi_sandpit_pvc_7ecbab02_9f7b_4149_b559_ff52dacab2e1 -fields size, total, used, percent-used, percent-snapshot-space, snapshot-space-used
+
+
+# git-secret
+git secret tell 123456@123456.com.au
+gpg --import ~/.ssh/ocp-gpg-key.txt
+git secret tell 123456@123456.com.au
+git-secret reveal
+
+
+# prometheus
+irate(node_disk_written_bytes_total{instance="10.11.209.193:9100", device="nvme0n1"}[60s]) / 1024 / 1024
+irate(node_disk_read_bytes_total{instance="10.11.209.193:9100", device="nvme0n1"}[60s]) / 1024 / 1024
+node:node_disk_utilisation:avg_irate{node="ip-10-11-209-193.domain.com"} * 100
+sum(rate(haproxy_backend_http_responses_total{code="5xx"} [2m])) by (namespace)
+sum(rate(haproxy_frontend_http_responses_total{code="5xx"}[3m])) by (job) > 0
+sum(rate(haproxy_backend_http_responses_total{backend="other/openshift_default"}[3m])) by (job) > 0
+haproxy_backend_http_average_response_latency_milliseconds{namespace="a-004281"}> 20
+sum by(namespace, pod_name, container_name) (rate(container_cpu_usage_seconds_total{container_name!="",container_name!="POD", image!="",job="kubelet", namespace="openshift-logging", pod_name="logging-es-data-master-cqufqv0u-26-prbrj"}[5m]))
+
+# quota
+100 * kube_resourcequota{namespace="a-004141",resourcequota=~".*base.*", resource="cpu", type="used"} / ignoring(instance, job, type) kube_resourcequota{namespace="a-004141",resourcequota=~".*base.*", resource="cpu", type="hard"}
+100 * kube_resourcequota{namespace="a-004141",resourcequota=~".*base.*", resource="memory", type="used"} / ignoring(instance, job, type) kube_resourcequota{namespace="a-004141",resourcequota=~".*base.*", resource="memory", type="hard"}
+
+# CPU usage / limitraneg max
+#100 * sum(rate(container_cpu_usage_seconds_total{namespace=~"$namespace", pod_name=~"$pod", image!="", container_name!="POD" }[5m])) / sum(kube_limitrange{namespace=~"$namespace", constraint="max", resource="cpu", type="Container"})
+
+# CPU percentage of request
+100 * sum(rate(container_cpu_usage_seconds_total{namespace=~"$namespace", pod_name=~"$pod", container_name!="POD", image!=""}[5m])) / sum(kube_pod_container_resource_requests_cpu_cores{namespace=~"$namespace",pod=~"$pod"})
+
+
+
+
+# get the log4j files
+#oc3 get pods --all-namespaces | grep ^a  | awk '{print "echo", $1,$2"\n", "oc3 -n", $1, "rsh", $2, "ls /tomcat/lib/", "\n", "echo \"\""}' > dev-all-a-pods.sh
+#oc3 get pods --all-namespaces | grep ^a  | awk '{print "echo", $1,$2"\n", "oc3 -n", $1, "rsh", $2, "-- bash -c", "\"find /opt -name \"app.jar\" -exec unzip -l {} \\; | grep log4j ; echo "" ; echo tomcat ; find /tomcat -name \"*log4j*\"\"", "2> /dev/null", "\n", "echo \"\""}' > dev-all-pods.sh
+#oc3 get pods --all-namespaces | grep ^a  | awk '{print "echo", $1,$2"\n", "oc3 -n", $1, "exec", $2, "-- bash -c", "\"find /opt -name \"app.jar\" -exec unzip -l {} \\; | grep log4j ; echo "" ; echo tomcat ; find /tomcat -name \"*log4j*\"\"", "2> /dev/null", "\n", "echo \"\""}'
+oc3 get pods --all-namespaces | grep ^a  | awk '{print "echo", $1,$2"\n", "oc3 -n", $1, "exec", $2, "-- bash -c", "\"find /opt -name \"app.jar\" -exec unzip -l {} \\; | grep log4j-core ; echo "" ; echo tomcat ; find /tomcat -name \"*log4j-core*\"\"", "2> /dev/null", "\n", "echo \"\""}' > dev-all-pods.sh  
+sh dev-all-pods.sh  > $(date +%H%M-%d-%m-%Y)-dev-sorted.txt
+
+
+
+# Splunk search
+# Delay in indexing
+index=openshift | eval delay_sec=_indextime-_time  | timechart  min(delay_sec) avg(delay_sec) max(delay_sec) p99(delay_sec)
+
+# cpu / mem stats from a pod
+# cpu limit divided by 1000
+cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us
+
+# Usage
+cat /sys/fs/cgroup/memory/memory.usage_in_bytes
+# Limit
+cat /sys/fs/cgroup/memory/memory.memsw.limit_in_bytes
+cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+
+
+# Find the veth associated with pod
+# From the node where the pod is running
+ip addr -a 
+# match the number from the pod to the above
+oc rsh <pod> cat  /sys/class/net/eth0/iflink
+
+# iperf 
+iperf -c 10.16.125.197 -p 8443 -i 1 -t 5
+
+# wait for condition
+oc3 wait pod --for condition=containersready --timeout=60s -l app=grafana
+
+# Get v4 cluster config items
+oc proxy &
+curl -s 127.0.0.1:8001/apis/config.openshift.io/v1 |jq  '.resources[].name'
