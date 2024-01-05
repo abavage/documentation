@@ -3,6 +3,7 @@ ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem
 
 # deploy
 oc create deploy tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
+oc create deploy tools --image=registry.access.redhat.com/ubi9/toolbox:9.3-10:latest -- sleep infinity
 oc set resources deployment tools --limits=cpu=200m,memory=200Mi --requests=cpu=100m,memory=100Mi
 
 oc run tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
@@ -20,6 +21,11 @@ grep "pods,watch" sorted-audit-2023-11-09T04-21-29.518.log | grep collect | wc
 # thanos endpoint query
 TOKEN=$(oc -n openshift-monitoring get secret $(oc -n openshift-monitoring get sa prometheus-k8s -o json  | jq -r '.secrets[].name') -o json | jq -r '.metadata.annotations."openshift.io/token-secret.value"')
 curl -k -H "Authorization: Bearer $TOKEN" https://thanos-querier-openshift-monitoring.apps..../api/v1/query? --data-urlencode "query=up"
+
+# thanos endpoitn list all metrics
+TOKEN=$(oc -n openshift-monitoring get secret $(oc -n openshift-monitoring get sa prometheus-k8s -o json  | jq -r '.secrets[].name') -o json | jq -r '.metadata.annotations."openshift.io/token-secret.value"')
+curl -k -H "Authorization: Bearer $TOKEN" https://thanos-querier-openshift-monitoring.apps..../api/v1/label/__name__/values | jq
+
 
 # KUBECONFIG
 # On master nodes
