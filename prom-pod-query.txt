@@ -1,0 +1,14 @@
+# limits
+sum( kube_pod_container_resource_limits{job="kube-state-metrics", cluster="", namespace="openshift-monitoring", pod="alertmanager-main-0", resource="cpu"})
+
+# request
+sum( kube_pod_container_resource_requests{job="kube-state-metrics", cluster="", namespace="openshift-monitoring", pod="alertmanager-main-0", resource="cpu"})
+
+# cpu usage pod on the the node.
+sum by (cluster, namespace, pod, container) (irate(container_cpu_usage_seconds_total{job="kubelet", metrics_path="/metrics/cadvisor", image!="", namespace="openshift-monitoring", pod="alertmanager-main-0"}[5m])) * on (cluster, namespace, pod) group_left(node) topk by (cluster, namespace, pod) (1, max by(cluster, namespace, pod, node) (kube_pod_info{node!="", namespace="openshift-monitoring", pod="alertmanager-main-0"}))
+
+# cpu throttling
+sum by (namespace, pod, container) (increase(container_cpu_cfs_throttled_periods_total{job="kubelet", metrics_path="/metrics/cadvisor", namespace="andrew", pod=~"tools.*", container!="", }[5m]))  /sum(increase(container_cpu_cfs_periods_total{job="kubelet", metrics_path="/metrics/cadvisor", namespace="andrew", pod=~"tools.*", container!="", cluster=""}[5m])) by (namespace, pod, container) 
+
+# cpu throttling with node - needs valid data other wise the time series throws duplicate metric errors..
+sum by (namespace, pod, container) (increase(container_cpu_cfs_throttled_periods_total{job="kubelet", metrics_path="/metrics/cadvisor", namespace="andrew", pod=~"tools.*", container!="", }[5m]))  / sum by (namespace, pod, container) (increase(container_cpu_cfs_periods_total{job="kubelet", metrics_path="/metrics/cadvisor", namespace="andrew", pod=~"tools.*", container!="", cluster=""}[5m]))  * on (namespace, pod) group_left(node) (kube_pod_info{namespace="andrew", pod=~"tools.*"})
