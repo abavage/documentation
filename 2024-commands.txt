@@ -61,6 +61,13 @@ etcdctl del /kubernetes.io/secrets/nonprod/file
 # events can consume considerable size also
 for i in $(etcdctl get "" --prefix --keys-only | grep nonprod | grep events) ; do etcdctl del $i ; done
 
+
+# get a count of etcd objects - kube standard
+etcdctl get / --prefix --keys-only | sed '/^$/d' | cut -d/ -f3 | sort | uniq -c | sort -rn
+
+# get a count of deploymentConfigs
+etcdctl --command-timeout=60s get --prefix --keys-only /kubernetes.io/controllers | awk -F/ '/./ { print $3 }' | uniq -c
+
 ## Stop the kube-apiserver on a master
 oc debug node/<node>
 chroot /host
