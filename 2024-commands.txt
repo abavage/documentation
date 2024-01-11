@@ -1,9 +1,12 @@
 # ps
 ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem
 
+# simple expansions
+touch /tmp/{jjj,jj}
+
 # deploy
 oc create deploy tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
-oc create deploy tools --image=registry.access.redhat.com/ubi9/toolbox:9.3-10:latest -- sleep infinity
+oc create deploy tools --image=registry.access.redhat.com/ubi9/toolbox:latest -- sleep infinity
 oc set resources deployment tools --limits=cpu=200m,memory=200Mi --requests=cpu=100m,memory=100Mi
 
 oc run tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
@@ -26,6 +29,8 @@ curl -k -H "Authorization: Bearer $TOKEN" https://thanos-querier-openshift-monit
 TOKEN=$(oc -n openshift-monitoring get secret $(oc -n openshift-monitoring get sa prometheus-k8s -o json  | jq -r '.secrets[].name') -o json | jq -r '.metadata.annotations."openshift.io/token-secret.value"')
 curl -k -H "Authorization: Bearer $TOKEN" https://thanos-querier-openshift-monitoring.apps..../api/v1/label/__name__/values | jq
 
+# another variation
+curl -s -g -k -X GET -H "Authorization: Bearer $TOKEN" -H 'Accept: application/json' -H 'Content-Type: application/json' "$URL/api/v1/alerts" | jq  -c '.data.alerts[] | select( .state == "firing" and .labels.severity == "critical")'
 
 # KUBECONFIG
 # On master nodes
@@ -102,3 +107,29 @@ oc get pods -n openshift-kube-apiserver
 
 # force redeployment - takes the operator 5 - 10mins to rollout
 oc patch kubeapiserver/cluster --type merge -p "{\"spec\":{\"forceRedeploymentReason\":\"Forcing new revision with random number $(date --rfc-3339=ns) to make message unique\"}}"
+
+# infrastructure
+oc get infrastructure cluster  -o yaml
+
+# patch ingress controller for logging
+oc patch ingresscontrollers default --type='merge' -p '{"spec": {"logging": {"access": {"destination": {"type": "Container"}}}}}'
+
+# patch kube-apiserver
+oc patch apiserver cluster --type='merge' -p '{"spec": {"audit": {"profile": "AllRequestBodies"}}}'
+oc get co authentication kube-apiserver openshift-apiserver
+oc get pods -n openshift-kube-apiserver
+
+## while read
+podman images -n | awk '{print $1,$2}' | while read IMAGE TAG ; do echo -e $IMAGE:$TAG "---" '\c' ; podman inspect $IMAGE:$TAG | jq '.[].Created'  ; done
+
+
+###
+# Set the variable
+$ CUSTOMER_DOMAIN="<cluster_name>.<URI>"
+
+# Check connection through the LB
+$ curl https://api-int.${CUSTOMER_DOMAIN}:6443/healthz -k -w "\n ##############\n %{url_effective} (%{remote_ip})\n ##############\n code: %{http_code}\n --- \n namelookup: %{time_namelookup}\n connect: %{time_connect}\n appconnect: %{time_appconnect}\n pretransfer: %{time_pretransfer}\n redirect: %{time_redirect}\n starttrans: %{time_starttransfer}\n ---\n total: %{time_total}\n\n"
+
+# Check the connection through one of the Master node:
+$ curl https://api-int.${CUSTOMER_DOMAIN}:6443/healthz -k -w "\n ##############\n %{url_effective} (%{remote_ip})\n ##############\n code: %{http_code}\n --- \n namelookup: %{time_namelookup}\n connect: %{time_connect}\n appconnect: %{time_appconnect}\n pretransfer: %{time_pretransfer}\n redirect: %{time_redirect}\n starttrans: %{time_starttransfer}\n ---\n total: %{time_total}\n\n" --resolve api-int.${CUSTOMER_DOMAIN}:6443:10.150.38.233
+###
