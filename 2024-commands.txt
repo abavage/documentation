@@ -133,3 +133,10 @@ $ curl https://api-int.${CUSTOMER_DOMAIN}:6443/healthz -k -w "\n ##############\
 # Check the connection through one of the Master node:
 $ curl https://api-int.${CUSTOMER_DOMAIN}:6443/healthz -k -w "\n ##############\n %{url_effective} (%{remote_ip})\n ##############\n code: %{http_code}\n --- \n namelookup: %{time_namelookup}\n connect: %{time_connect}\n appconnect: %{time_appconnect}\n pretransfer: %{time_pretransfer}\n redirect: %{time_redirect}\n starttrans: %{time_starttransfer}\n ---\n total: %{time_total}\n\n" --resolve api-int.${CUSTOMER_DOMAIN}:6443:10.150.38.233
 ###
+
+# core dumps
+/var/lib/systemd/coredump/ 
+coredumpctl list
+
+# journalctl 
+journalctl --no-pager --all --full --since today > /tmp/journal_today.out 2>&1
