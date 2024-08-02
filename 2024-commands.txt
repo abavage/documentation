@@ -140,3 +140,44 @@ coredumpctl list
 
 # journalctl 
 journalctl --no-pager --all --full --since today > /tmp/journal_today.out 2>&1
+
+# login to the local image registry
+oc login -u
+oc debug node/<node> -n openshift-monitoring
+podman login -u <username> -p $(oc whoami -t) image-registry.openshift-image-registry.svc:5000
+
+# looking in the directory structure of the image registry
+oc rsh image-registry-67fb6757bc-mnw2k
+sh-4.4$ cd /registry/docker/registry/v2/repositories/
+sh-4.4$ ls -ltr
+
+## crc
+eval $(crc oc-env)
+crc start
+crc stop
+
+## curl send 4 x requests
+curl -k https://some_url/?[1-4]
+
+# fancy node display
+oc get nodes | sort -k3 | sed '1h;1d;$!H;$!d;G'
+
+# curl via a proxy
+curl --proxy https://somename:port https://registry.connect.redhat.com
+
+# delete events from namespaces
+# need to test it
+# do it with a for loop
+oc delete events --all -n <namespace>
+
+# jq with periods
+oc get secrets ab-ecr-secret-three -o json | jq -r '.data.".dockerconfigjson"' | base64 -d
+
+# query thanos
+curl http://thanos-querier-coo-demo-andrew.apps.x7s8n5p4t9p1f9i.bw9h.p1.openshiftapps.com/api/v1/query --data-urlencode 'query=up' | jq
+
+# get the data out of thanos
+curl http://thanos-querier-coo-demo-andrew.apps.x7s8n5p4t9p1f9i.bw9h.p1.openshiftapps.com/api/v1/label/__name__/values | jq
+
+# get the configured servicemonitors
+curl http://thanos-querier-coo-demo-andrew.apps.x7s8n5p4t9p1f9i.bw9h.p1.openshiftapps.com/api/v1/targets | jq '.data.activeTargets[].scrapePool'
