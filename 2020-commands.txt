@@ -1,3 +1,4 @@
+#
 oc describe hostsubnet ip-10-11-208-229.domain.com
 
 oc new-build 123456-s2i-base-rhel7:latest~ssh://git@bitbucket.domain.com:2222/~a123456/httpd.git --name=a123456 --source-secret=a123456-bitbucket --strategy=docker
