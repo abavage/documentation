@@ -8,6 +8,8 @@ touch /tmp/{jjj,jj}
 oc create deploy tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
 oc create deploy tools --image=registry.access.redhat.com/ubi9/toolbox:latest -- sleep infinity
 oc set resources deployment tools --limits=cpu=200m,memory=200Mi --requests=cpu=100m,memory=100Mi
+oc set volume deploy/prometheus-one -t pvc --add --name=prometheus-one --claim-name=prometheus-one  -m /prometheus
+
 
 oc run tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
 oc run tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest  --dry-run=client -o yaml
