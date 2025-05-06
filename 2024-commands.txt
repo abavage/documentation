@@ -183,3 +183,6 @@ curl http://thanos-querier-coo-demo-andrew.apps.x7s8n5p4t9p1f9i.bw9h.p1.openshif
 
 # get the configured servicemonitors
 curl http://thanos-querier-coo-demo-andrew.apps.x7s8n5p4t9p1f9i.bw9h.p1.openshiftapps.com/api/v1/targets | jq '.data.activeTargets[].scrapePool'
+
+# ssh-ketgen
+ssh-keygen -t rsa -N "" -f .ssh/one_id_rsa
