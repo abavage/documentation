@@ -1,15 +1,15 @@
-# work around to display sensitive info - not ideal..
+# display sensitive info 
 data "aws_ssm_parameter" "al2023" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
 output "param_id" {
-  value = data.aws_ssm_parameter.al2023.value
-  sensitive = true
+  value = nonsensitive(data.aws_ssm_parameter.al2023.value)
 }
 
 Changes to Outputs:
-  + param_id               = (sensitive value)
+  + param_id               = "ami-06a0b33485e9d1cf1"
 
+# Or the less ideal approach 
 terraform plan -out=tfplan
 terraform show -json tfplan | jq > out.json
