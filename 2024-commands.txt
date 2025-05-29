@@ -192,3 +192,11 @@ ls -i
 
 find . -maxdepth 1 -type d -inum 1119276 -exec rm -r {} \;
 find . -type d -inum 1119276 -exec rm -r {} \;
+
+## .bashrc
+if command -v oc &> /dev/null; then
+  source <(oc completion bash)
+fi
+
+# create route edge
+oc create route edge blah --insecure-policy=Redirect --service=blah
