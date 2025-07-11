@@ -200,3 +200,15 @@ fi
 
 # create route edge
 oc create route edge blah --insecure-policy=Redirect --service=blah
+
+## git merge up main
+# stay on the branch
+git checkout feature-branch
+git branch
+git fetch origin
+git merge origin/main
+git push
+
+
+# 
+oc get --raw /api/v1/nodes/ip-10-0-11-191.ap-southeast-2.compute.internal/proxy/stats/summary | jq
