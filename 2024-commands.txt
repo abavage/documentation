@@ -212,3 +212,6 @@ git push
 
 # 
 oc get --raw /api/v1/nodes/ip-10-0-11-191.ap-southeast-2.compute.internal/proxy/stats/summary | jq
+
+# metrics on kubelet
+curl -kv -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" https://x.x.x.x:10250/metrics/resource
