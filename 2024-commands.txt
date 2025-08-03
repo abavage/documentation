@@ -215,3 +215,6 @@ oc get --raw /api/v1/nodes/ip-10-0-11-191.ap-southeast-2.compute.internal/proxy/
 
 # metrics on kubelet
 curl -kv -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" https://x.x.x.x:10250/metrics/resource
+
+## not tested -- The following command can be used to retrive a list of clusterrolebindings assigned to a given user:
+oc get clusterrolebindings -o json | jq --arg USER $(oc whoami) '.items[] | select(.subjects[0].name==$USER)' |jq '.subjects[0].name,.roleRef.name'
