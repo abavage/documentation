@@ -199,7 +199,9 @@ if command -v oc &> /dev/null; then
 fi
 
 # create route edge
-oc create route edge blah --insecure-policy=Redirect --service=blah
+oc create deploy httpd --image=registry.redhat.io/ubi9/httpd-24:latest
+oc cerate svc clusterip httpd --tcp=8080:8080
+oc create route edge httpd --insecure-policy=Redirect --service=httpd
 
 ## git merge up main
 # stay on the branch
