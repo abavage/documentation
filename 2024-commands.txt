@@ -231,6 +231,8 @@ rosa verify network --subnet-ids <subnetid1>,<subnetid2>,<subnetid3>  --watch --
 rosa verify quota
 rosa list instance-types
 rosa describe cluster -c this-cluster -o json | jq '.version.available_upgrades'
+
+# show which rosa_tf_version
 rosa describe cluster -c this-cluster -o json | jq '.properties'
 
 # add line after every comma
