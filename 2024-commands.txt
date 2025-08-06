@@ -226,5 +226,7 @@ oc get clusterrolebindings -o json | jq --arg USER $(oc whoami) '.items[] | sele
 # curl options
 for i in {1..50}; do curl -X GET "http://localhost:8080" -o /dev/null -s -w "HTTP Status: %{http_code} | DNS: %{time_namelookup}s | Connect: %{time_connect}s | TLS: %{time_appconnect}s | StartTransfer: %{time_starttransfer}s | Total: %{time_total}s\n"  -H "Accept: application/json"; done
 
-# rosa command
+# rosa verify command
 rosa verify network --subnet-ids <subnetid1>,<subnetid2>,<subnetid3>  --watch --region <region> --role-arn arn:aws:iam::xxxx:role/yyyy-Installer-Role
+rosa verify quota
+
