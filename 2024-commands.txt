@@ -238,3 +238,23 @@ rosa describe cluster -c this-cluster -o json | jq '.properties'
 
 # add line after every comma
 oc get node ip-10-0-12-157.ap-southeast-2.compute.internal --show-labels  | sed 's/,/,\'$'\n/g'
+
+# cluster autoscaler status
+oc get cm cluster-autoscaler-status -n kube-system
+
+# helm
+helm status gitops-operator -n openshift -o yaml
+
+# read tls.key
+openssl rsa -in tls.key -text -noout
+
+# velero
+velero get backup -n openshift-adp
+velero backup logs schedule-1-20250821040055 -n openshift-adp
+velero delete backup schedule-1-20250821034555 -n openshift-adp
+velero schedule get -n openshift-adp
+velero schedule pause schedule-1  -n openshift-adp
+
+# label on a resource to stop backups
+velero.io/exclude-from-backup: "true"
+
