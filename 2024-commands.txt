@@ -276,7 +276,7 @@ velero restore create two --from-backup andrew-backup-20250825020010 --namespace
 velero restore describe two -n openshift-adp
 
 
-## nodes cerated and ready time
+## nodes created and ready time
 oc get nodes -o custom-columns='NAME:.metadata.name,CREATED:.metadata.creationTimestamp,READY:.status.conditions[?(@.type=="Ready")].lastTransitionTime'
 
 oc adm node-logs ip-10-0-0-72.ap-southeast-1.compute.internal 
@@ -318,6 +318,5 @@ VALUES
 
 # seletc the data
 SELECT * FROM employees;
-
 
 
