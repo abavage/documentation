@@ -233,6 +233,9 @@ rosa list instance-types
 rosa describe cluster -c this-cluster -o json | jq '.version.available_upgrades'
 rosa list upgrade
 
+# once TF has run and scheduled the upgrade
+rosa describe cluster -c this-cluster -o json | jq '.scheduledUpgrade'
+
 # show which rosa_tf_version
 rosa describe cluster -c this-cluster -o json | jq '.properties'
 
@@ -257,4 +260,64 @@ velero schedule pause schedule-1  -n openshift-adp
 
 # label on a resource to stop backups
 velero.io/exclude-from-backup: "true"
+
+# restore
+velero get backup -n openshift-adp
+velero restore create one --from-backup andrew-backup-20250825024010 -n openshift-adp
+velero restore describe one -n openshift-adp
+velero restore logs one -n openshift-adp
+
+# restore to a different namespace
+# src: andrew
+# dest: one
+
+velero get backup -n openshift-adp
+velero restore create two --from-backup andrew-backup-20250825020010 --namespace-mappings andrew:one
+velero restore describe two -n openshift-adp
+
+
+## nodes cerated and ready time
+oc get nodes -o custom-columns='NAME:.metadata.name,CREATED:.metadata.creationTimestamp,READY:.status.conditions[?(@.type=="Ready")].lastTransitionTime'
+
+oc adm node-logs ip-10-0-0-72.ap-southeast-1.compute.internal 
+
+## aws
+aws efs describe-file-systems | jq '.FileSystems[].FileSystemId'
+aws sts get-caller-identity
+
+# add the developer option to the ui
+oc patch console.operator.openshift.io/cluster --type='merge' -p '{"spec":{"customization":{"perspectives":[{"id":"dev","visibility":{"state":"Enabled"}}]}}}'
+
+# use a template
+oc get template -A
+oc process --parameters postgresql-persistent -n openshift
+oc process  postgresql-persistent -n openshift -p POSTGRESQL_USER=andrew -p POSTGRESQL_PASSWORD=sun123 POSTGRESQL_DATABASE=sampledb -p POSTGRESQL_VERSION=10-el8  | oc create -f -
+
+# connect to the db
+oc rsh <postgresql-1-t5tpm>
+psql -h 127.0.0.1 -p 5432 -U andrew -d sampledb
+
+# add a table
+sampledb=> CREATE TABLE employees (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    hire_date DATE DEFAULT CURRENT_DATE,
+    salary NUMERIC(10,2)
+);
+
+# list table
+\d employees;
+
+# add data into the table
+sampledb=> INSERT INTO employees (first_name, last_name, email, salary)
+VALUES
+('Alice', 'Brown', 'alice@example.com', 80000.00),
+('Bob', 'Smith', 'bob@example.com', 95000.00);
+
+# seletc the data
+SELECT * FROM employees;
+
+
 
