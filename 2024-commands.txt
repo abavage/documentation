@@ -319,4 +319,12 @@ VALUES
 # seletc the data
 SELECT * FROM employees;
 
+# add superuser
+sh-4.4$ psql -U postgres
+ALTER USER andrew WITH SUPERUSER;
+\du+
 
+# checkpoint the database
+psql -h 127.0.0.1 -p 5432 -U andrew -d sampledb -c CHECKPOINT
+
+ALTER USER andrew WITH SUPERUSER;
