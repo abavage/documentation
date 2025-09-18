@@ -239,6 +239,9 @@ rosa describe cluster -c this-cluster -o json | jq '.scheduledUpgrade'
 # show which rosa_tf_version
 rosa describe cluster -c this-cluster -o json | jq '.properties'
 
+# show the validatingadmissionpolicies icsp 
+oc get validatingadmissionpolicies
+
 # add line after every comma
 oc get node ip-10-0-12-157.ap-southeast-2.compute.internal --show-labels  | sed 's/,/,\'$'\n/g'
 
@@ -328,3 +331,9 @@ ALTER USER andrew WITH SUPERUSER;
 psql -h 127.0.0.1 -p 5432 -U andrew -d sampledb -c CHECKPOINT
 
 ALTER USER andrew WITH SUPERUSER;
+
+
+## ACM
+
+# explain 
+oc explain --api-version=policy.open-cluster-management.io/v1 ConfigurationPolicy
