@@ -4,6 +4,15 @@ ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem
 # simple expansions
 touch /tmp/{jjj,jj}
 
+# cuase I can never remember - stdout and stderr
+ls -la > /dev/null 2>&1 
+
+# stdout only
+ls -la 2> /dev/null
+
+# add this to a shell script
+exec > /tmp/somefile.log 2>&1
+
 # deploy
 oc create deploy tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
 oc create deploy tools --image=registry.access.redhat.com/ubi9/toolbox:latest -- sleep infinity
@@ -299,6 +308,11 @@ oc process  postgresql-persistent -n openshift -p POSTGRESQL_USER=andrew -p POST
 # connect to the db
 oc rsh <postgresql-1-t5tpm>
 psql -h 127.0.0.1 -p 5432 -U andrew -d sampledb
+
+# list databases
+\list
+
+
 
 # add a table
 sampledb=> CREATE TABLE employees (
