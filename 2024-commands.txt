@@ -141,6 +141,9 @@ podman images -n | awk '{print $1,$2}' | while read IMAGE TAG ; do echo -e $IMAG
 # jq
 oc get pdb -A -o json | jq '.items[] | { name: .metadata.name, status: .status } | select (.status.disruptionsAllowed == 0) | { name: .name}'
 
+# skopeo to local registry
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+skopeo list-tags  --tls-verify=false  --creds="serviceaccount:${TOKEN}" docker://image-registry.openshift-image-registry.svc.cluster.local:5000/image-builds/test
 
 ###
 # Set the variable
