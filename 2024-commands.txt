@@ -252,6 +252,7 @@ rosa verify quota
 rosa list instance-types
 rosa describe cluster -c this-cluster -o json | jq '.version.available_upgrades'
 rosa list upgrade
+rosa verify network -c <cluster>
 
 # once TF has run and scheduled the upgrade
 rosa describe cluster -c this-cluster -o json | jq '.scheduledUpgrade'
