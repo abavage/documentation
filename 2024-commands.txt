@@ -254,6 +254,9 @@ rosa describe cluster -c this-cluster -o json | jq '.version.available_upgrades'
 rosa list upgrade
 rosa verify network -c <cluster>
 
+# create the vpc/subnets with cloudformation
+rosa create network rosa-quickstart-default-vpc --param Region=ap-southeast-2 --param Name=rosa-quick-stack --param AvailabilityZoneCount=3 --param VpcCidr=10.0.0.0/16
+
 # once TF has run and scheduled the upgrade
 rosa describe cluster -c this-cluster -o json | jq '.scheduledUpgrade'
 
