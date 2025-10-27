@@ -366,3 +366,21 @@ ALTER USER andrew WITH SUPERUSER;
 
 # explain 
 oc explain --api-version=policy.open-cluster-management.io/v1 ConfigurationPolicy
+
+## network debugging
+https://github.com/openshift/network-tools
+
+# success
+oc get podnetworkconnectivitychecks -n openshift-network-diagnostics -o json | jq '.items[]| .spec.targetEndpoint,.status.successes[0]'
+
+# failure
+oc get podnetworkconnectivitychecks -n openshift-network-diagnostics -o json | jq '.items[]| .spec.targetEndpoint,.status.failures[0]'
+
+# outages
+oc get podnetworkconnectivitychecks -n openshift-network-diagnostics -o json | jq '.items[]| .spec.targetEndpoint,.status.outages[0]'
+
+## feature gate
+oc get featuregate cluster -o yaml
+
+
+
