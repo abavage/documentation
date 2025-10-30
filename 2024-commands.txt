@@ -386,5 +386,8 @@ oc get podnetworkconnectivitychecks -n openshift-network-diagnostics -o json | j
 ## feature gate
 oc get featuregate cluster -o yaml
 
+# IMDSv2 aws instance
+TOKEN=$(curl -X PUT -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" http://169.254.169.254/latest/api/token)
+curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/
 
 
