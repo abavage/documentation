@@ -31,6 +31,11 @@ git update-index --chmod=+x somefile.sh
 oc run tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
 oc run tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest  --dry-run=client -o yaml
 
+# scc
+oc adm policy who-can use scc anyuid
+
+
+
 ## Aduit logs
 oc adm node-logs --role=master --path=kube-apiserver/
 oc adm node-logs  <master_node> --path=kube-apiserver/audit-2023-11-09T05-32-38.217.log > audit-2023-11-09T05-32-38.217.log
@@ -399,3 +404,6 @@ whois 15.134.75.179
 
 # aws endpoints
 aws ec2 describe-vpc-endpoints --region ap-southeast-2 --query "VpcEndpoints[*].{ID:VpcEndpointId,Service:ServiceName,State:State,DNS:DnsEntries[*].DnsName}" --output table
+
+## system reserved rosa nodes
+cat /etc/node-sizing.env
