@@ -17,6 +17,10 @@ exec > /tmp/somefile.log 2>&1
 find / -perm -u=s -type f 2>/dev/null
 find / -perm -o=w -type f 2>/dev/null
 
+# du -sh
+du -sh -- .[!.]* * 2>/dev/null | sort -hr | head -n 10
+du -sh /var/lib/containers/storage/overlay/* 2>/dev/null | sort -rh  | head -n 40
+
 # deploy
 oc create deploy tools --image=registry.redhat.io/openshift4/network-tools-rhel8:latest -- sleep infinity
 oc create deploy tools --image=registry.access.redhat.com/ubi9/toolbox:latest -- sleep infinity
@@ -55,6 +59,9 @@ curl -k -H "Authorization: Bearer $TOKEN" https://thanos-querier-openshift-monit
 
 # another variation
 curl -s -g -k -X GET -H "Authorization: Bearer $TOKEN" -H 'Accept: application/json' -H 'Content-Type: application/json' "$URL/api/v1/alerts" | jq  -c '.data.alerts[] | select( .state == "firing" and .labels.severity == "critical")'
+
+# can-i
+oc auth can-i get deployment --as=system:serviceaccount:prometheus:prometheus
 
 # KUBECONFIG
 # On master nodes
@@ -255,6 +262,9 @@ oc get clusterrolebindings -o json | jq --arg USER $(oc whoami) '.items[] | sele
 # curl options
 for i in {1..50}; do curl -X GET "http://localhost:8080" -o /dev/null -s -w "HTTP Status: %{http_code} | DNS: %{time_namelookup}s | Connect: %{time_connect}s | TLS: %{time_appconnect}s | StartTransfer: %{time_starttransfer}s | Total: %{time_total}s\n"  -H "Accept: application/json"; done
 
+# another curl
+curl -w "%{time_connect}\n" -o /dev/null -s api.openshift.com
+
 # rosa verify command
 rosa verify network --subnet-ids <subnetid1>,<subnetid2>,<subnetid3>  --watch --region <region> --role-arn arn:aws:iam::xxxx:role/yyyy-Installer-Role
 rosa verify quota
@@ -283,6 +293,9 @@ oc get cm cluster-autoscaler-status -n kube-system
 
 # helm
 helm status gitops-operator -n openshift -o yaml
+
+# this
+openssl s_client -connect api.one.55s9.p3.openshiftapps.com:443 -showcerts -servername api.one.55s9.p3.openshiftapps.com
 
 # read tls.key
 openssl rsa -in tls.key -text -noout
