@@ -1,0 +1,23 @@
+## sts assume role to push to sns topic
+# TOKEN cat /var/run/secrets/eks.amazonaws.com/serviceaccount/token
+aws sts assume-role-with-web-identity --role-arn "$ROLE_ARN" --role-session-name "AlertmanagerTestSession" --web-identity-token "$TOKEN"
+
+# from the output
+
+export AWS_ACCESS_KEY_ID=""
+export AWS_SECRET_ACCESS_KEY=""
+export AWS_SESSION_TOKEN=""
+
+curl -X POST https://sns.ap-southeast-2.amazonaws.com/ \
+  --user "$AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY" \
+  --aws-sigv4 "aws:amz:ap-southeast-2:sns" \
+  -H "X-Amz-Security-Token: $AWS_SESSION_TOKEN" \
+  -d "Action=Publish" \
+  -d "TopicArn=arn:aws:sns:ap-southeast-2:xxxxxxxxxxxx:one-rosa-monitoring-sns-topic" \
+  -d "Message=Test notification using manual Web Identity Token exchange" \
+  -d "Version=2010-03-31"
+
+# using the above process can use the role locally to test the policy
+aws <resource> <action> <options>
+
+

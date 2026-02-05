@@ -282,6 +282,9 @@ rosa describe cluster -c this-cluster -o json | jq '.scheduledUpgrade'
 # show which rosa_tf_version
 rosa describe cluster -c this-cluster -o json | jq '.properties'
 
+# add a openid IDP - for it to create (not work) --issuer-url needs to be valid. 22
+rosa create idp --cluster one --type openid --name AAD --mapping-method claim --client-id 1234567 --client-secret 1234567 --issuer-url https://login.microsoftonline.com/1f4f7eda-6e51-425e-a0f9-4c2fcef58a522/v2.0  --email-claims email --username-claims preferred_username --groups-claims groups
+
 # show the validatingadmissionpolicies icsp 
 oc get validatingadmissionpolicies
 
