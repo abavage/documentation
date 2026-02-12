@@ -303,6 +303,9 @@ openssl s_client -connect api.one.55s9.p3.openshiftapps.com:443 -showcerts -serv
 # read tls.key
 openssl rsa -in tls.key -text -noout
 
+# read csr
+openssl req -in file.csr -noout -text
+
 # velero
 velero get backup -n openshift-adp
 velero backup logs schedule-1-20250821040055 -n openshift-adp
