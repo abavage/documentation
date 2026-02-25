@@ -20,4 +20,35 @@ curl -X POST https://sns.ap-southeast-2.amazonaws.com/ \
 # using the above process can use the role locally to test the policy
 aws <resource> <action> <options>
 
+# clear data on odf managed disk
+wipefs -a /dev/sda 
+sgdisk --zap-all /dev/sda 
+dd if=/dev/urandom of=/dev/sda bs=1M count=2000
+
+# nmcli bond / tag
+nmcli connection add type bond con-name bond0 ifname bond0 bond.options "mode=802.3ad,miimon=100,lacp_rate=fast" ipv4.method disabled ipv6.method disabled
+nmcli connection add type ethernet con-name bond0-port1 ifname <device> master bond0
+nmcli connection add type ethernet con-name bond0-port2 ifname <device> master bond0
+
+nmcli connection modify bond0-port1 ipv4.method disabled ipv6.method disabled
+nmcli connection modify bond0-port2 ipv4.method disabled ipv6.method disabled
+
+nmcli connection add type vlan con-name bond0.1234 ifname bond0.1234 dev bond0 id 1234  ipv4.addresses <ipaddress/mask> ipv4.gateway <gw ip> ipv4.method manual connection.autoconnect yes
+
+nmcli connection up bond0
+nmcli connection up bond0-port1
+nmcli connection up bond0-port2
+nmcli connection up bond0.1234
+
+cat /proc/net/bonding/bond0
+
+# odf check
+oc exec -n openshift-storage deploy/rook-ceph-operator -i -t -- /bin/bash -c "export CEPH_CONF=/var/lib/rook/openshift-storage/openshift-storage.config && ceph status"
+oc exec -n openshift-storage deploy/rook-ceph-operator -i -t -- /bin/bash -c "export CEPH_CONF=/var/lib/rook/openshift-storage/openshift-storage.config && ceph fs status"
+oc exec -n openshift-storage deploy/rook-ceph-operator -i -t -- /bin/bash -c "export CEPH_CONF=/var/lib/rook/openshift-storage/openshift-storage.config && ceph df"
+oc exec -n openshift-storage deploy/rook-ceph-operator -i -t -- /bin/bash -c "export CEPH_CONF=/var/lib/rook/openshift-storage/openshift-storage.config && ceph tell mds.ocs-storagecluster-cephfilesystem-a perf dump mds_mem"
+oc exec -n openshift-storage deploy/rook-ceph-operator -i -t -- /bin/bash -c "export CEPH_CONF=/var/lib/rook/openshift-storage/openshift-storage.config && ceph osd df tree"
+oc get pods -n openshift-storage -o wide  | grep Pend
+oc get pods -o wide -n blah | egrep -v 'Running|Completed' | awk '{print $7}'  | sort | uniq -c | sort -nr
+oc get pods -n openshift-storage -o wide | egrep 'rook-ceph-mon|rook-ceph-mds-ocs-storagecluster-cephfilesystem'
 
