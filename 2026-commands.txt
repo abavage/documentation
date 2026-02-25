@@ -52,3 +52,6 @@ oc get pods -n openshift-storage -o wide  | grep Pend
 oc get pods -o wide -n blah | egrep -v 'Running|Completed' | awk '{print $7}'  | sort | uniq -c | sort -nr
 oc get pods -n openshift-storage -o wide | egrep 'rook-ceph-mon|rook-ceph-mds-ocs-storagecluster-cephfilesystem'
 
+# scp ssh
+ssh -i .ssh/<some_key> ec2-user@127.0.0.1 -p <port>
+scp -i ~/.ssh/id_rsa -P <port> <some_file> ec2-user@127.0.0.1:/tmp/
