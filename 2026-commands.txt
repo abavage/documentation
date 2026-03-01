@@ -55,3 +55,15 @@ oc get pods -n openshift-storage -o wide | egrep 'rook-ceph-mon|rook-ceph-mds-oc
 # scp ssh
 ssh -i .ssh/<some_key> ec2-user@127.0.0.1 -p <port>
 scp -i ~/.ssh/id_rsa -P <port> <some_file> ec2-user@127.0.0.1:/tmp/
+
+# patch ingress
+oc patch ingresscontroller default -n openshift-ingress-operator --type='merge' -p ' {"spec": {"namespaceSelector": {"matchExpressions": [{ "key": "ingress", "operator": "NotIn", "values": ["'apps'"]}]}}}'
+
+# find the keepalive apivip
+oc logs -c keepalived keepalived-control[1-3] -n openshift-kni-infra | grep -i master
+
+# ACM ztp build 
+oc get infraenv -A | grep <cluster_name>
+oc get agentclusterinstall -A | grep <cluster_name>
+
+
