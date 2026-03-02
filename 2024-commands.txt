@@ -306,6 +306,10 @@ openssl rsa -in tls.key -text -noout
 # read csr
 openssl req -in file.csr -noout -text
 
+# options
+openssl s_client -connect jjj.apps.sierra-espresso.net:443  -servername jjj.apps.sierra-espresso.net </dev/null | openssl x509 -noout -dates -subject -issuer
+openssl s_client -connect jjj.apps.sierra-espresso.net:443 -servername jjj.apps.sierra-espresso.net | openssl x509 -noout -dates
+
 # velero
 velero get backup -n openshift-adp
 velero backup logs schedule-1-20250821040055 -n openshift-adp
