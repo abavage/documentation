@@ -310,6 +310,16 @@ openssl req -in file.csr -noout -text
 openssl s_client -connect jjj.apps.sierra-espresso.net:443  -servername jjj.apps.sierra-espresso.net </dev/null | openssl x509 -noout -dates -subject -issuer
 openssl s_client -connect jjj.apps.sierra-espresso.net:443 -servername jjj.apps.sierra-espresso.net | openssl x509 -noout -dates
 
+# read in a fill chain
+while openssl x509 -noout -text ; do :; done < full-chain.pem > full-chain-out.txt
+
+# convert from cer (binary) to crt (base64)
+openssl x509 -inform der -in host.cer -out host.crt
+
+# check md5 between crt and key
+openssl x509 -noout -modulus -in host.crt | openssl md5
+openssl rsa -noout -modulus -in host.key | openssl md5
+
 # velero
 velero get backup -n openshift-adp
 velero backup logs schedule-1-20250821040055 -n openshift-adp
