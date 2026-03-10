@@ -74,3 +74,9 @@ oc get cgu -A | egrep "ocp.*11.*"
 # aws find instances in region
 aws ec2 describe-instance-type-offerings --location-type availability-zone --filters Name=instance-type,Values=g7e.2xlarge --region ap-southeast-1 --output table
 
+# helm
+helm repo list
+helm repo add helm-gitops  https://abavage.github.io/helm-gitops/
+helm search repo
+helm search repo <something>
+helm pull helm-gitops/namespaces
