@@ -80,3 +80,5 @@ helm repo add helm-gitops  https://abavage.github.io/helm-gitops/
 helm search repo
 helm search repo <something>
 helm pull helm-gitops/namespaces
+helm repo update 
+helm repo update <repo>

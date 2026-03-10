@@ -193,6 +193,8 @@ Step 2: After the merge conflicts are resolved, stage the changes accordingly, c
 git commit 
 git push origin HEAD
 
+# commit to a branch
+git push --set-upstream origin <branch>
 
 # patch an image in dc / depoy / rc / rs
 oc3 patch rc somename -p '{"spec": {"template": {"spec": {"containers": [{"name": "ui-dev", "image": "docker-registry.default.svc:5000/name/image:0.1"}]}}}}'
