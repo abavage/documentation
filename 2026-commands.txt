@@ -57,10 +57,10 @@ ssh -i .ssh/<some_key> ec2-user@127.0.0.1 -p <port>
 scp -i ~/.ssh/id_rsa -P <port> <some_file> ec2-user@127.0.0.1:/tmp/
 
 # patch ingress
-oc patch ingresscontroller default -n openshift-ingress-operator --type='merge' -p ' {"spec": {"namespaceSelector": {"matchExpressions": [{ "key": "ingress", "operator": "NotIn", "values": ["'apps'"]}]}}}'
+oc patch ingresscontroller default -n openshift-ingress-operator --type='merge' -p ' {"spec": {"namespaceSelector": {"matchExpressions": [{ "key": "ingress", "operator": "NotIn", "values": ["apps"]}]}}}'
 
 # patch ingress and add a new key/value
-oc patch ingresscontrollers default -n openshift-ingress-operator --type='json' -p'[{"op":"add", "path":"/spec/namespaceSelector/matchExpressions/-", "value": {"key": "ingress", "operator": "NotIn", "values": ["'apps1'"] }}]'
+oc patch ingresscontrollers default -n openshift-ingress-operator --type='json' -p'[{"op":"add", "path":"/spec/namespaceSelector/matchExpressions/-", "value": {"key": "ingress", "operator": "NotIn", "values": ["apps1"] }}]'
 
 # find the keepalive apivip
 oc logs -c keepalived keepalived-control[1-3] -n openshift-kni-infra | grep -i master
