@@ -440,3 +440,6 @@ aws ec2 describe-vpc-endpoints --region ap-southeast-2 --query "VpcEndpoints[*].
 
 ## system reserved rosa nodes
 cat /etc/node-sizing.env
+
+# deployment rollout restart
+oc rollout restart deployment <name> -n <namespace>

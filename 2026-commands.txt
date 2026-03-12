@@ -50,7 +50,7 @@ oc exec -n openshift-storage deploy/rook-ceph-operator -i -t -- /bin/bash -c "ex
 oc exec -n openshift-storage deploy/rook-ceph-operator -i -t -- /bin/bash -c "export CEPH_CONF=/var/lib/rook/openshift-storage/openshift-storage.config && ceph osd df tree"
 oc get pods -n openshift-storage -o wide  | grep Pend
 oc get pods -o wide -n blah | egrep -v 'Running|Completed' | awk '{print $7}'  | sort | uniq -c | sort -nr
-oc get pods -n openshift-storage -o wide | egrep 'rook-ceph-mon|rook-ceph-mds-ocs-storagecluster-cephfilesystem'
+oc get pods -n openshift-storage -o wide | egrep 'rook-ceph-mon|rook-ceph-mds-ocs-storagecluster-cephfilesystem|rook-ceph-osd'
 
 # scp ssh
 ssh -i .ssh/<some_key> ec2-user@127.0.0.1 -p <port>
@@ -82,3 +82,37 @@ helm search repo <something>
 helm pull helm-gitops/namespaces
 helm repo update 
 helm repo update <repo>
+
+
+########### machineconfig mc machineconfigpool mcp ###########
+# force to use sepecifc / old renedered config
+
+# get a running node in mcp with the 'desired' config
+oc get node compute1 -o jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/desiredConfig}{"\n"}
+oc get node compute1 | jq '.metadata.annotations."machineconfiguration.openshift.io/desiredConfig"'
+rendered-worker-xxxxxxxx
+
+oc get node compute1 -o jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/currentConfig}{"\n"}
+oc get node compute1 | jq '.metadata.annotations."machineconfiguration.openshift.io/currentConfig"'
+rendered-worker-xxxxxxxx
+
+# force a reconfigure on the node to match the desired
+oc debug node/compute4 -- touch /host/run/machine-config-daemon-force
+
+# patch the node with the machineconfiguration
+oc patch node compute4 --patch '{ "metadata": { "annotations": { "machineconfiguration.openshift.io/desiredConfig": "rendered-worker-xxxxxxxx" } } }'
+## this might not be required..?
+oc patch node compute4 --patch '{ "metadata": { "annotations": { "machineconfiguration.openshift.io/currentConfig": "rendered-worker-xxxxxxxx" } } }'
+
+# check the status - node should reboot
+oc get nodes
+oc get mcp
+oc get node compute4 -o jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/desiredConfig}{"\n"}
+oc get node compute4 -o jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/currentConfig}{"\n"}
+
+########### machineconfig end ###########
+
+# lsblk show the disk if it's got a raid config or not as "LOGICAL VOLUME"
+lsblk -o +model
+
+
