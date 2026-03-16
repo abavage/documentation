@@ -98,6 +98,8 @@ rendered-worker-xxxxxxxx
 
 # force a reconfigure on the node to match the desired
 oc debug node/compute4 -- touch /host/run/machine-config-daemon-force
+chroot /host
+touch /run/machine-config-daemon-force
 
 # patch the node with the machineconfiguration
 oc patch node compute4 --patch '{ "metadata": { "annotations": { "machineconfiguration.openshift.io/desiredConfig": "rendered-worker-xxxxxxxx" } } }'
@@ -115,4 +117,8 @@ oc get node compute4 -o jsonpath='{.metadata.annotations.machineconfiguration\.o
 # lsblk show the disk if it's got a raid config or not as "LOGICAL VOLUME"
 lsblk -o +model
 
+## tuned
 
+
+
+oc get profiles.tuned.openshift.io -n openshift-cluster-node-tuning-operator
