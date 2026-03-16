@@ -89,11 +89,11 @@ helm repo update <repo>
 
 # get a running node in mcp with the 'desired' config
 oc get node compute1 -o jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/desiredConfig}{"\n"}
-oc get node compute1 | jq '.metadata.annotations."machineconfiguration.openshift.io/desiredConfig"'
+oc get node compute1 -o json | jq '.metadata.annotations."machineconfiguration.openshift.io/desiredConfig"'
 rendered-worker-xxxxxxxx
 
 oc get node compute1 -o jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/currentConfig}{"\n"}
-oc get node compute1 | jq '.metadata.annotations."machineconfiguration.openshift.io/currentConfig"'
+oc get node compute1 -o json | jq '.metadata.annotations."machineconfiguration.openshift.io/currentConfig"'
 rendered-worker-xxxxxxxx
 
 # force a reconfigure on the node to match the desired
