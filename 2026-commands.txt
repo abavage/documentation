@@ -118,7 +118,4 @@ oc get node compute4 -o jsonpath='{.metadata.annotations.machineconfiguration\.o
 lsblk -o +model
 
 ## tuned
-
-
-
 oc get profiles.tuned.openshift.io -n openshift-cluster-node-tuning-operator
