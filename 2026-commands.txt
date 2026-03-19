@@ -119,3 +119,11 @@ lsblk -o +model
 
 ## tuned
 oc get profiles.tuned.openshift.io -n openshift-cluster-node-tuning-operator
+
+# rando numa
+oc get noderesourcetopologies.topology.node.k8s.io
+oc get numaresourcesoperators.nodetopology.openshift.io numaresourcesoperator -o yaml
+
+# upgrade info upgrade from -> to version
+# https://amd64.ocp.releases.ci.openshift.org/releasestream/4-stable/release/4.20.16?from=4.19.26
+oc adm release info 4.19.26 4.20.2 --changelog=changes5  > changelog5.md
