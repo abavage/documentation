@@ -324,6 +324,9 @@ openssl x509 -inform der -in host.cer -out host.crt
 openssl x509 -noout -modulus -in host.crt | openssl md5
 openssl rsa -noout -modulus -in host.key | openssl md5
 
+# remove a passphrase from a key
+openssl rsa -in encrypted.key -out insecure.key
+
 # velero
 velero get backup -n openshift-adp
 velero backup logs schedule-1-20250821040055 -n openshift-adp
