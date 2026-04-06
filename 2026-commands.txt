@@ -84,6 +84,7 @@ helm repo update
 helm repo update <repo>
 
 
+
 ########### machineconfig mc machineconfigpool mcp ###########
 # force to use sepecifc / old renedered config
 
@@ -130,3 +131,50 @@ oc adm release info 4.19.26 4.20.2 --changelog=changes5  > changelog5.md
 
 # systemcl
 systemctl cat kubelet
+
+# sort output wiht column
+man column
+cat somefile | column -t
+
+#####
+more a b
+::::::::::::::
+a
+::::::::::::::
+1234
+5678
+abcd
+::::::::::::::
+b
+::::::::::::::
+7890
+abcd
+2222
+
+Only display unique lines in file a compared to file b
+man comm
+comm -23 <(sort a) <(sort b)
+
+## another variabtion - finds common lines
+cat a.txt a.txt c.txt | sort | uniq -d
+
+#####
+# ACS - add log4j with broken image
+oc create deploy log4j --image=vulhub/log4j:2.8.1 -- sleep infinity
+
+# oc auth
+oc auth can-i --list=true
+oc auth can-i <verb> <resource>
+
+# remove terminating project
+oc get ns openshift-gitops -o json > gitops.json
+vim gitops.json
+    "spec": {
+        "finalizers": []
+    },
+oc proxy &
+curl -k -H "Content-Type: application/json" -X PUT --data-binary @gitops.json http://127.0.0.1:8001/api/v1/namespaces/openshift-gitops/finalize
+
+# get windows details
+net user ab123456 /domain
+
