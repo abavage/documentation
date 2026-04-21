@@ -113,6 +113,9 @@ oc get mcp
 oc get node compute4 -o jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/desiredConfig}{"\n"}
 oc get node compute4 -o jsonpath='{.metadata.annotations.machineconfiguration\.openshift\.io/currentConfig}{"\n"}
 
+# if it refuses to rollout
+oc patch mcp/worker --type merge -p '{"spec":{"paused":true}}'
+
 ########### machineconfig end ###########
 
 # lsblk show the disk if it's got a raid config or not as "LOGICAL VOLUME"
@@ -178,3 +181,66 @@ curl -k -H "Content-Type: application/json" -X PUT --data-binary @gitops.json ht
 # get windows details
 net user ab123456 /domain
 
+# tcpdump
+tcpdump -nni <interface> arp
+
+# must-gather
+oc adm must-gather
+oc adm inspect ns/<ns_name>
+oc adm must-gather --image=registry.redhat.io/ansible-automation-platform-25/aap-must-gather-rhel8:latest
+
+## AAP postgresql migration
+# Create the database in the postgres-13-0 pod
+# https://www.postgresql.org/docs/current/app-pgrestore.html
+ 
+CREATE ROLE awx WITH LOGIN PASSWORD '<the_on_prem_passwd>';
+SELECT rolname FROM pg_roles ;
+CREATE DATABASE awx WITH OWNER awx;
+
+psql -h 127.0.0.1 -p 5432 -U awx -d awx
+
+oc exec -i <postgresql-pod> -- bash -c '
+PGPASSWORD="<old_postgres_password>" pg_dump -h <old_postgres_host> -U <old_postgres_user> -d <old_postgres_database> -p <old_postgres_port> -F custom -f /tmp/awx.dump
+'
+oc exec -i <postgresql-pod> -- bash -c '
+PGPASSWORD="<new_postgres_password>" pg_restore -j 4 --clean --if-exists -U <new_postgres_user> -d <new_postgres_database> /tmp/awx.dump
+'
+
+## oc selector
+oc get pods -A --field-selector spec.nodeName=some_node 
+
+# ACM node delete / rebuild
+# Power off the machine - if possible dd the disks (root/odf/lvms etc)
+
+# From the source cluster
+oc delete node <node>
+oc get machine -A
+oc annotate machine <machine-name> -n openshift-machine-api machine.openshift.io/delete-machine=true
+# scale down one replica for the deleted node.
+# the new node is 'not' added back to the machineset. Its a 'scaled up' node and does not participate in the machineset
+oc scale machineset <machineset-name> -n openshift-machine-api --replicas=<new-size>
+oc get bmh -A
+oc delete bmh <bmh>
+
+# In acm remove the node from the cluster inventory
+
+## Confirm the node is gone from ACM and the cluster
+oc get nodes
+oc get machines -A
+oc get 
+
+## Add the node back via the "Add Hosts" in the cluster inventory - using the "With BMC form"
+# The "Baseboard Management Controller Address" needs to be in the form of "redfish-virtualmedia://<bmc ip address>/redfish/v1/Systems/1"
+
+# The node should start - monitor via ACM
+# on the cluster approve the CSR's as they appear
+oc get csr
+oc adm certificate approve <csr>
+oc get csr -o name | xargs oc adm certificate approve
+oc get nodes
+oc get pods -A --field-selector spec.nodeName=some_node
+
+## additional  if the node is stuck 'installing' and can't remove from ACM
+oc get agent -A
+oc get agent  91152273-66df-464e-3234-bde45f10c3cf -o yaml | yq '.spec.hostname'
+oc delete agent 91152273-66df-464e-3234-bde45f10c3cf
