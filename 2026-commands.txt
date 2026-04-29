@@ -244,3 +244,31 @@ oc get pods -A --field-selector spec.nodeName=some_node
 oc get agent -A
 oc get agent  91152273-66df-464e-3234-bde45f10c3cf -o yaml | yq '.spec.hostname'
 oc delete agent 91152273-66df-464e-3234-bde45f10c3cf
+
+
+####
+$ oc get agent
+NAME                                   CLUSTER           APPROVED   ROLE     STAGE
+21ab71e1-8f2c-caad-cb7d-6af5f270a7e6   ocpa012pm002400   true       master   Done
+46d4cf4d-78f8-6e96-1597-14bf7086a4fe   ocpa012pm002400   true       worker   Done
+75edf2d0-f6ee-e870-479f-454f4ce5d538   ocpa012pm002400   true       worker   Done
+7f81f877-f26d-d8cd-64f5-0eff90856c75   ocpa012pm002400   true       worker   Done
+81a359f5-349e-b107-f57c-698241990eda   ocpa012pm002400   true       master   Done
+91152273-66df-464e-3234-bde45f10c3cf   ocpa012pm002400   true       worker   Waiting for control plane
+a6d3ff7c-b7ad-ca60-1145-da69bc9b1922   ocpa012pm002400   true       master   Done
+
+$ oc get agent  91152273-66df-464e-3234-bde45f10c3cf -o yaml | yq '.spec.hostname'
+compute1.ocpa012pm002400.vodafone.com.au
+
+POD_NAME=$(oc get po -n multicluster-engine | grep assisted-service | awk '{print $1}')
+id=e49b9521-fff3-86a9-ca53-ae2eb3636444
+
+oc exec -it -c postgres -n multicluster-engine $POD_NAME -- psql -d installer -c "delete from hosts where id='$id';"  </dev/null
+
+oc logs assisted-service-65785866ff-xvz6n | grep -i 91152273-66df-464e-3234-bde45f10c3cf
+
+installer=# select * from hosts where id = '91152273-66df-464e-3234-bde45f10c3cf';
+
+## dd
+dd if=/dev/zero of=/var/lib/etcd/dd-zero.test bs=1k count=400000 oflag=direct
+dd if=/dev/zero of=/var/lib/etcd/dd-zero.test bs=4k count=100000 oflag=direct
