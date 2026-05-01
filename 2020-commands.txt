@@ -280,3 +280,10 @@ oc3 wait pod --for condition=containersready --timeout=60s -l app=grafana
 # Get v4 cluster config items
 oc proxy &
 curl -s 127.0.0.1:8001/apis/config.openshift.io/v1 |jq  '.resources[].name'
+
+# vim remove ^M from file "cat -vet file"
+:set ff=unix
+:wq
+
+
+#

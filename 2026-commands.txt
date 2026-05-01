@@ -68,6 +68,7 @@ oc logs -c keepalived keepalived-control[1-3] -n openshift-kni-infra | grep -i m
 # ACM acm ztp build 
 oc get infraenv -A | grep <cluster_name>
 oc get agentclusterinstall -A | grep <cluster_name>
+oc get agent -n <cluster_name>
 # if the cgu is not running remove the ztp-done label from the cluster
 oc get cgu -A | egrep "ocp.*11.*"
 
