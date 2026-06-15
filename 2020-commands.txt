@@ -18,6 +18,7 @@ oc new-build 123456-s2i-tomcat-feature-opnshift-537:8.5-jdk8-ubi7-20191014~ssh:/
 
 oc describe nodes -l node-role.kubernetes.io/compute=true | awk '/CPU Requests/,/Allocated resources/'
 
+ps faxuw
 ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head
 sar -p -f /var/log/sa/saXY
 sar -r -f /var/log/sa/saXY

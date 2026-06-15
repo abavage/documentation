@@ -133,6 +133,8 @@ oc get numaresourcesoperators.nodetopology.openshift.io numaresourcesoperator -o
 # https://amd64.ocp.releases.ci.openshift.org/releasestream/4-stable/release/4.20.16?from=4.19.26
 oc adm release info 4.19.26 4.20.2 --changelog=changes5  > changelog5.md
 
+oc adm release info quay.io/openshift-release-dev/ocp-release:4.20.21-multi
+
 # systemcl
 systemctl cat kubelet
 
@@ -273,3 +275,23 @@ installer=# select * from hosts where id = '91152273-66df-464e-3234-bde45f10c3cf
 ## dd
 dd if=/dev/zero of=/var/lib/etcd/dd-zero.test bs=1k count=400000 oflag=direct
 dd if=/dev/zero of=/var/lib/etcd/dd-zero.test bs=4k count=100000 oflag=direct
+
+oc get nodes -l node-role.kubernetes.io/worker -o custom-columns=NAME:.metadata.name,CPU_REQ:.status.allocatable.cpu,MEM_REQ:.status.allocatable.memory
+
+# making masters schedulable
+oc get schedulers.config.openshift.io cluster -o yaml
+oc patch schedulers.config.openshift.io cluster --type merge -p '{"spec":{"mastersSchedulable":false}}'
+
+
+oc delete pods -n api-dev --field-selector spec.nodeName=control1
+oc rollout restart
+oc logs -f deploy/<name> --all-containers=true
+ksniff ?? wireshark to a pod
+
+# ansible in aap pod
+ansible-galaxy collection install kubernetes.core:=4.0.0 --force
+
+# rds
+curl -o global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+export RDSHOST="aap.cz4g0oa4kzrz.ap-southeast-2.rds.amazonaws.com" 
+psql "host=$RDSHOST port=5432 dbname=test user=postgres sslmode=verify-full sslrootcert=./global-bundle.pem"
